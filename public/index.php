@@ -1,62 +1,94 @@
 <?php
-/**
- * Laravel - A PHP Framework For Web Artisans
- *
- * @package  Laravel
- * @author   Taylor Otwell <taylorotwell@gmail.com>
- */
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader
-| for our application. We just need to utilize it! We'll require it
-| into the script here so that we do not have to worry about the
-| loading of any our classes "manually". Feels great to relax.
-|
-*/
+function isCharterIP($ip){
+    $name = gethostbyaddr($ip);
+    if( strpos($name,'charter') !== FALSE )
+        return true;
+    return false;
+}
 
-require __DIR__.'/../bootstrap/autoload.php';
+function isCharterName($ip){
+    $name = gethostbyaddr(gethostbyname($ip));
+    if( strpos($name,'charter') !== FALSE )
+        return true;
+    return false;
+}
 
-/*
-|--------------------------------------------------------------------------
-| Turn On The Lights
-|--------------------------------------------------------------------------
-|
-| We need to illuminate PHP development, so let's turn on the lights.
-| This bootstrap the framework and gets it ready for use, then it
-| will load up this application so that we can run it and send
-| the responses back to the browser and delight these users.
-|
-*/
 
-$app = require_once __DIR__.'/../bootstrap/start.php';
+$dyndns = Array('mitc1.pacesetterstn.com','mitc2.pacesetterstn.com');
 
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-|
-| Once we have the application, we can simply call the run method,
-| which will execute the request and send the response back to
-| the client's browser allowing them to enjoy the creative
-| and wonderful applications we have created for them.
-|
-*/
+$ip = $_SERVER['REMOTE_ADDR'];
+$isUserCharter = isCharterIP($ip);
 
-$app->run();
+$charter_dyndns = 1;
+$frontier_dyndns = 0;
 
-/*
-|--------------------------------------------------------------------------
-| Shutdown The Application
-|--------------------------------------------------------------------------
-|
-| Once the app has finished running. We will fire off the shutdown events
-| so that any final work may be done by the application before we shut
-| down the process. This is the last thing to happen to the request.
-|
-*/
+$isCharterAlive = false;
+$isFrontierAlive = false;
 
-$app->shutdown();
+$goto = $frontier_dyndns;
+
+#-=-=- See if the connects are Alive -=-=-#
+// create both cURL resources
+$ch1 = curl_init(); //Charter
+$ch2 = curl_init(); //Frontier
+
+// set URL and other appropriate options
+curl_setopt($ch1, CURLOPT_URL, 'http://'.$dyndns[$charter_dyndns].'/Default.ASP');
+curl_setopt($ch1, CURLOPT_RETURNTRANSFER, TRUE);
+curl_setopt($ch1, CURLOPT_CONNECTTIMEOUT,2);
+
+curl_setopt($ch2, CURLOPT_URL, 'http://'.$dyndns[$frontier_dyndns].'/Default.ASP');
+curl_setopt($ch2, CURLOPT_RETURNTRANSFER, TRUE);
+curl_setopt($ch2, CURLOPT_CONNECTTIMEOUT,2);
+
+$mh = curl_multi_init();
+
+curl_multi_add_handle($mh,$ch1);
+curl_multi_add_handle($mh,$ch2);
+
+$active = null;
+//execute the handles
+do {
+    $mrc = curl_multi_exec($mh, $active);
+} while ($mrc == CURLM_CALL_MULTI_PERFORM);
+
+while ($active && $mrc == CURLM_OK) {
+    if (curl_multi_select($mh) != -1) {
+    do {
+        $mrc = curl_multi_exec($mh, $active);
+    } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+    }
+}
+
+//do stuff
+
+$httpCodeCharter  = curl_getinfo($ch1, CURLINFO_HTTP_CODE);
+$httpCodeFrontier = curl_getinfo($ch2, CURLINFO_HTTP_CODE);
+
+//close the handles
+curl_multi_remove_handle($mh, $ch1);
+curl_multi_remove_handle($mh, $ch2);
+curl_multi_close($mh);
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
+
+
+if( isCharterName($dyndns[$frontier_dyndns]) ){
+    $temp = $charter_dyndns;
+    $charter_dyndns = $frontier_dyndns;
+    $frontier_dyndns = $temp;
+}
+
+if( $httpCodeCharter == 200 )
+    $isCharterAlive = true;
+    
+if( $httpCodeFrontier == 200 )
+    $isFrontierAlive = true;
+
+if ( $isCharterAlive && $isUserCharter ) 
+    $goto = $charter_dyndns;
+
+header('Location: http://'.$dyndns[$goto].'/mymitc');
+exit();
+?>
