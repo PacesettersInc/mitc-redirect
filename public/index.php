@@ -1,4 +1,9 @@
 <?php
+$debug = isset($_GET['debug']);
+
+function debug($text) {
+    echo "<pre>$text</pre>";
+}
 
 function isCharterIP($ip){
     $name = gethostbyaddr($ip);
@@ -19,6 +24,9 @@ $dyndns = Array('mitc1.pacesetterstn.com','mitc2.pacesetterstn.com');
 
 $ip = $_SERVER['REMOTE_ADDR'];
 $isUserCharter = isCharterIP($ip);
+
+debug("IP: $ip");
+debug("isUserCharter: $isUserCharter");
 
 $charter_dyndns = 1;
 $frontier_dyndns = 0;
@@ -74,11 +82,15 @@ curl_multi_close($mh);
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
 
-if( isCharterName($dyndns[$frontier_dyndns]) ){
-    $temp = $charter_dyndns;
-    $charter_dyndns = $frontier_dyndns;
-    $frontier_dyndns = $temp;
-}
+// if( isCharterName($dyndns[$frontier_dyndns]) ){
+//     debug('Charter!')
+//     $temp = $charter_dyndns;
+//     $charter_dyndns = $frontier_dyndns;
+//     $frontier_dyndns = $temp;
+// }
+
+debug("Charter HTTP: $httpCodeCharter");
+debug("Other HTTP: $httpCodeFrontier");
 
 if( $httpCodeCharter == 200 )
     $isCharterAlive = true;
@@ -88,6 +100,12 @@ if( $httpCodeFrontier == 200 )
 
 if ( $isCharterAlive && $isUserCharter ) 
     $goto = $charter_dyndns;
+
+$gotoUrl = 'http://'.$dyndns[$goto].'/mymitc';
+
+debug("GoTo: <a href='$gotoUrl'>$gotoUrl</a>");
+
+if ($debug) die('Debug is enabled!');
 
 header('Location: http://'.$dyndns[$goto].'/mymitc');
 exit();
