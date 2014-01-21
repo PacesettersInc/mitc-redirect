@@ -84,12 +84,12 @@ curl_multi_close($mh);
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
 
-if( isCharterName($dyndns[$frontier_dyndns]) ){
-    debug('Charter!')
-    $temp = $charter_dyndns;
-    $charter_dyndns = $frontier_dyndns;
-    $frontier_dyndns = $temp;
-}
+// if( isCharterName($dyndns[$frontier_dyndns]) ){
+//     debug('Charter!')
+//     $temp = $charter_dyndns;
+//     $charter_dyndns = $frontier_dyndns;
+//     $frontier_dyndns = $temp;
+// }
 
 debug("Charter HTTP: $httpCodeCharter");
 debug("Other HTTP: $httpCodeFrontier");
