@@ -7,6 +7,7 @@ function debug($text) {
 
 function isCharterIP($ip){
     $name = gethostbyaddr($ip);
+    debug("Name: $name");
     if( strpos($name,'charter') !== FALSE )
         return true;
     return false;
@@ -14,6 +15,7 @@ function isCharterIP($ip){
 
 function isCharterName($ip){
     $name = gethostbyaddr(gethostbyname($ip));
+    debug("Name: $name");
     if( strpos($name,'charter') !== FALSE )
         return true;
     return false;
@@ -26,7 +28,7 @@ $ip = $_SERVER['REMOTE_ADDR'];
 $isUserCharter = isCharterIP($ip);
 
 debug("IP: $ip");
-debug("isUserCharter: $isUserCharter");
+debug("isUserCharter: " . $isUserCharter ? 'Yes' : 'No');
 
 $charter_dyndns = 1;
 $frontier_dyndns = 0;
