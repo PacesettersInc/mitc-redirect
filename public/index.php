@@ -24,11 +24,11 @@ function isCharterName($ip){
 
 $dyndns = Array('mitc1.pacesetterstn.com','mitc2.pacesetterstn.com');
 
-$ip = $_SERVER['REMOTE_ADDR'];
+$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 $isUserCharter = isCharterIP($ip);
 
 debug("IP: $ip");
-debug("isUserCharter: " . $isUserCharter ? 'Yes' : 'No');
+debug("isUserCharter: " . ($isUserCharter ? 'Yes' : 'No'));
 
 $charter_dyndns = 1;
 $frontier_dyndns = 0;
