@@ -24,14 +24,14 @@ function isCharterName($ip){
 
 $dyndns = Array('mitc1.pacesetterstn.com','mitc2.pacesetterstn.com');
 
-$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+$ip = $_SERVER['REMOTE_ADDR'];
 $isUserCharter = isCharterIP($ip);
 
 debug("IP: $ip");
 debug("isUserCharter: " . ($isUserCharter ? 'Yes' : 'No'));
 
-$charter_dyndns = 1;
-$frontier_dyndns = 0;
+$charter_dyndns = 0;
+$frontier_dyndns = 1;
 
 $isCharterAlive = false;
 $isFrontierAlive = false;
@@ -84,12 +84,12 @@ curl_multi_close($mh);
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-#
 
 
-// if( isCharterName($dyndns[$frontier_dyndns]) ){
-//     debug('Charter!')
-//     $temp = $charter_dyndns;
-//     $charter_dyndns = $frontier_dyndns;
-//     $frontier_dyndns = $temp;
-// }
+if( isCharterName($dyndns[$frontier_dyndns]) ){
+    debug('Charter!')
+    $temp = $charter_dyndns;
+    $charter_dyndns = $frontier_dyndns;
+    $frontier_dyndns = $temp;
+}
 
 debug("Charter HTTP: $httpCodeCharter");
 debug("Other HTTP: $httpCodeFrontier");
